@@ -3,6 +3,9 @@ name: Deploy
 on:
     workflow_dispatch:
 
+env:
+    AZURE_WEBAPP_NAME: "ASPDotNETCoreWebAppRazorPages20241201221639"    
+
 jobs:
     build:
         runs-on: ubuntu-latest
@@ -18,3 +21,16 @@ jobs:
 
             - name: Build
               run: dotnet build ./ASPDotNETCoreWebAppRazorPages/ASPDotNETCoreWebAppRazorPages.csproj --configuration Release --no-restore
+
+            # publish
+            - name: publish
+              run: dotnet publish ./ASPDotNETCoreWebAppRazorPages/ASPDotNETCoreWebAppRazorPages.csproj --configuration Release --output ./publish
+
+            # deploy to azure
+            - name: Deploy to Azure Web App
+              uses: azure/webapps-deploy@v2
+              with:
+                app-name: ${{ env.AZURE_WEBAPP_NAME }}
+                publish-profile: ${{ secrets.WEBAPP_PUBLISH_SECRET }}
+                package: ./publish
+
